@@ -22,7 +22,7 @@ contract PoolUpgradable is ERC20Upgradeable{
     event Withdraw(address indexed writer, uint256 amount);
 
     function __Pool_init(address _basicToken, string memory _description) internal initializer {
-        __ERC20_init("_UDP", _description);
+        __ERC20_init(_description,"_UDP");
         __Pool_init_unchained(_basicToken);
     }
 

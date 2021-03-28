@@ -6,6 +6,8 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 contract UDRouter is AccessControlUpgradeable{
 
   address public unstoppableDomainPool;
+  address public unstoppableDomainRegistry;
+  address public unstoppableFreeMinter;
   
   function initialize(address admin) public initializer{
         __AccessControl_init();
@@ -21,11 +23,27 @@ contract UDRouter is AccessControlUpgradeable{
       _;
   }
 
-   function setUDPool(address _address) public onlyAdmin {
+  function setUDPool(address _address) public onlyAdmin {
     unstoppableDomainPool = _address;
   }
 
   function udPool() public view returns (address){
     return unstoppableDomainPool;
+  }
+
+  function setUDRegistry(address _address) public onlyAdmin {
+    unstoppableDomainRegistry = _address;
+  }
+
+  function udRegistry() public view returns (address){
+    return unstoppableDomainRegistry;
+  }
+
+  function setUDFreeMinter(address _address) public onlyAdmin {
+    unstoppableFreeMinter = _address;
+  }
+
+  function udFreeMinter() public view returns (address){
+    return unstoppableFreeMinter;
   }
 }

@@ -4,6 +4,8 @@ const UpgradeableBeacon = artifacts.require("UpgradeableBeacon");
 const UniswapUtil = artifacts.require('UniswapUtil');
 const TestToken = artifacts.require('TestToken');
 const UDRouter = artifacts.require('UDRouter');
+const IRegistry = artifacts.require('IRegistry');
+const FreeMinter = artifacts.require('IFreeMinter');
 const EthCrypto = require("eth-crypto");
 
 // const UniswapFactory = artifacts.require("@uniswap/v2-core/contracts/IUniswapV2Factory.sol");
@@ -13,6 +15,8 @@ const EthCrypto = require("eth-crypto");
 const { time, ether, expectRevert } = require('openzeppelin-test-helpers');
 const BigDecimal = require('js-big-decimal');
 const { assert, expect } = require('chai');
+const { default: Resolution } = require('@unstoppabledomains/resolution');
+const resolution = new Resolution();
 const { deployProxy, upgradeProxy} = require('@openzeppelin/truffle-upgrades');
 // const { accounts, contract } = require('@openzeppelin/test-environment');
 
@@ -93,6 +97,28 @@ contract('UDPool', (accounts) => {
         let balanceAfter = await basicToken.balanceOf.call(mainAccount);
 
         assert.equal(balanceAfter.toString(),balanceBefore.toString(),"Balances should match");
+
+    });
+
+    it('should rent domain', async () => {
+
+        let rentPreriod = toBN(1*30*24*60*4);//1 month
+        let rentPerBloc = await udPool.domainRentPerBlock.call();
+        let rentPaymentAmt = rentPreriod.mul(rentPerBloc);
+
+        let registryAddr = await udRouter.udRegistry.call();
+        let registry = await IRegistry.at(registryAddr);
+        let poolBalance = await registry.balanceOf.call(udPool.address);
+        assert.equal(poolBalance.toString(),'2',"incorrect balance");
+
+        
+        let tokenID = '110338768019842421679919317810137434074751594351642569153399783902859600293709';
+        
+        await basicToken.approve.sendTransaction(udPool.address, rentPaymentAmt, {from:mainAccount});
+        let rentRes  = await udPool.rentDomain.sendTransaction(rentPreriod, toBN(tokenID), "QmQwKeQWMcWrcAJVNe8hR5WUCB8myiuWidRnrP9b8KWtbU",  {from:mainAccount});
+        console.log(`rentRes GasUsed: ${rentRes.receipt.gasUsed} `);
+        printEvents(rentRes);
+
 
     });
 
