@@ -147,9 +147,29 @@ import "../dot-crypto/contracts/IResolver.sol";
             //update domain key
             IResolver resolver = IResolver(unstoppableDomainRegistry.resolverOf(tokenId)); 
             resolver.set("ipfs.html.value", ipfsHashValue, tokenId);
+            resolver.set("metaverse.rent.validto.blocknumber", uint2str(domainRentRecords[tokenId].validTo), tokenId);
         } else {
             require(false, "domain already rented by another party");
         }
+    }
+
+    function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
+        if (_i == 0) {
+            return "0";
+        }
+        uint j = _i;
+        uint len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint k = len - 1;
+        while (_i != 0) {
+            bstr[k--] = byte(uint8(48 + _i % 10));
+            _i /= 10;
+        }
+        return string(bstr);
     }
 
     function cancelRent(uint256 tokenId) public {
@@ -157,13 +177,6 @@ import "../dot-crypto/contracts/IResolver.sol";
         require (domainRentRecords[tokenId].validTo > block.number, "can't cancel active rent");
         IResolver resolver = IResolver(unstoppableDomainRegistry.resolverOf(tokenId)); 
         resolver.set("ipfs.html.value", "", tokenId);
-    }
-
-    
-    function testName(string memory label) public view returns(string memory){
-        string memory DOMAIN_NAME_PREFIX = 'udtestdev-';
-        string memory labelWithPrefix = string(abi.encodePacked(DOMAIN_NAME_PREFIX, label));
-        return labelWithPrefix;
     }
 
     function onERC721Received(address operator, address from, uint256 tokenId, bytes memory data) public override returns (bytes4){
